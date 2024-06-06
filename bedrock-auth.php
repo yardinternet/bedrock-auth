@@ -1,20 +1,21 @@
 <?php
 /**
  * @package WP Bedrock Auth
- * @version 1.1.0
+ * @version 1.1.1
  */
 /*
 Plugin Name: WP Bedrock Auth
 Plugin URI: https://github.com/aprivette/bedrock-auth
 Description: Environment-specific basic auth for the Bedrock WordPress framework.
 Author: Adam Privette
-Version: 1.1.0
+Version: 1.1.1
 Author URI: https://github.com/aprivette/
 */
 
 namespace BedrockAuth;
 
 use Dotenv\Dotenv;
+
 use function Env\env;
 
 class BasicAuth
@@ -27,6 +28,10 @@ class BasicAuth
 
     public function initAuth()
     {
+        if (defined('DOING_CRON') && DOING_CRON) {
+            return;
+        }
+
         if (file_exists($this->root_dir . '/.env')) {
             $this->dotenv->load();
             $this->dotenv->required(['BASIC_AUTH_USER', 'BASIC_AUTH_PASS']);
@@ -42,7 +47,8 @@ class BasicAuth
     }
 
     // Adapted from https://gist.github.com/rchrd2/c94eb4701da57ce9a0ad4d2b00794131
-    private function requireAuth($user, $pass) {
+    private function requireAuth($user, $pass)
+    {
         header('Cache-Control: no-cache, must-revalidate, max-age=0');
 
         $has_supplied_credentials = !(empty($_SERVER['PHP_AUTH_USER']) && empty($_SERVER['PHP_AUTH_PW']));
